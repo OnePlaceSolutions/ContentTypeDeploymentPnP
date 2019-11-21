@@ -2,6 +2,7 @@
         This script applies the OnePlaceMail Email Columns to an existing site collection, creates Site Content Types, adds them to Document Libraries and creates a default view.
         Please check the README.md on Github before using this script.
 #>
+Add-Type -AssemblyName System.Windows.Forms
 Try{
     Set-ExecutionPolicy Bypass -Scope Process
 
@@ -279,9 +280,17 @@ Try{
             switch ($input) { 
                 'N'{
                     $script:createEmailColumns = $false
+                    #Get the Group name containing the OnePlaceMail Email Columns for use later per site, default is 'OnePlaceMail Solutions'
+                    $script:groupName = Read-Host -Prompt "Please enter the Group name containing the OnePlaceMail Email Columns in your SharePoint Site Collections (leave blank for default 'OnePlace Solutions')"
+                    If(-not $script:groupName){$script:groupName = "OnePlace Solutions"}
+                    Write-Host "Will check for columns under group '$script:groupName'"
                 }
                 'Y'{
                     $script:createEmailColumns = $true
+                    #Get the Group name we will create the OnePlaceMail Email Columns in for use later per site, default is 'OnePlaceMail Solutions'
+                    $script:groupName = Read-Host -Prompt "Please enter the Group name to create the OnePlaceMail Email Columns in, in your SharePoint Site Collections (leave blank for default 'OnePlace Solutions')"
+                    If(-not $script:groupName){$script:groupName = "OnePlace Solutions"}
+                    Write-Host "Will create and check for columns under group '$script:groupName'"
                 }
                 'q'{return}
             }
@@ -292,12 +301,6 @@ Try{
     }
 
     function Deploy{
-        Write-Host "`n--------------------------------------------------------------------------------`n" -ForegroundColor Red
-        
-        #Get the Group name containing the OnePlaceMail Email Columns for use later per site, default is 'OnePlaceMail Solutions'
-        $script:groupName = Read-Host -Prompt "Please enter the Group name containing the OnePlaceMail Email Columns in your SharePoint Site Collections (leave blank for default 'OnePlace Solutions')"
-        If(-not $script:groupName){$script:groupName = "OnePlace Solutions"}
-        Write-Host "Checking for columns under group '$script:groupName'"
         Write-Host "`n--------------------------------------------------------------------------------`n" -ForegroundColor Red
 
         emailColumnsMenu
@@ -451,11 +454,12 @@ Try{
                 #Check if we are creating views
                 Try{
                     If($script:createDefaultViews){
+                        Write-Host "Adding Default View '$script:emailViewName' to Document Library '$libName'."
                         Add-PnPView -List $libName -Title $script:emailViewName -Fields @('EmDate', 'Name','EmTo', 'EmFrom', 'EmSubject') -SetAsDefault -Web $site.web
                     }
                 }
                 Catch{
-                    Write-Host "Error adding Default View'$script:emailViewName' to Document Library '$libName'. Details below. Halting script." -ForegroundColor Red
+                    Write-Host "Error adding Default View '$script:emailViewName' to Document Library '$libName'. Details below. Halting script." -ForegroundColor Red
                     $_
                     Pause
                     Disconnect-PnPOnline
