@@ -338,6 +338,15 @@ Try{
                 #Sometimes you can continue before authentication has completed, this Start-Sleep adds a delay to account for this
                 Start-Sleep -seconds 2
             }
+            Catch [System.Management.Automation.ParameterBindingException]{
+                Write-Host "Error connecting to SharePoint Site Collection '$siteName'. Please check you are running this PowerShell session as Administrator." -ForegroundColor Red
+                $site.url
+                Write-Host "Other Details below. Forcing SharePoint disconnection if connected. Halting script." -ForegroundColor Red
+                $_
+                Pause
+                Disconnect-PnPOnline
+                Exit
+            }
             Catch{
                 Write-Host "Error connecting to SharePoint Site Collection '$siteName'. Is this URL correct?" -ForegroundColor Red
                 $site.url
@@ -507,7 +516,7 @@ Try{
                 ConnectToSharePointOnPremises
                 Deploy
             }
-            'q'{return}
+            'q'{Exit}
         } 
         pause 
     } 
@@ -516,8 +525,14 @@ Try{
     }
 }
 Catch{
-    Write-Host "Uncaught error. Details below. Halting script." -ForegroundColor Red
-    $_
-    Pause
+    If($_.FullyQualifiedErrorId -eq 'System.InvalidOperationException,SharePointPnP.PowerShell.Commands.Base.DisconnectSPOnline'){
+        Write-Host "SharePoint Disconnection attempted, not connected." -ForegroundColor Yellow
+        Pause
+    }
+    Else{
+        Write-Host "Uncaught error. Details below. Halting script." -ForegroundColor Red
+        $_
+        Pause
+    }
     Exit
 }
