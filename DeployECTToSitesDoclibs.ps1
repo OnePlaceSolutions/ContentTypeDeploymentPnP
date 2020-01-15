@@ -334,6 +334,7 @@ Try{
             Write-Host "Working with Site: $siteName" -ForegroundColor Yellow
             Write-Host "Working with Web: $siteWeb" -ForegroundColor Yellow
             Write-Host "Working in Site Collection Root: $siteUrl" -ForegroundColor Yellow
+            
             #Authenticate against the Site Collection we are currently working with
             Try{
                 If($script:isSPOnline){
@@ -357,7 +358,7 @@ Try{
             Catch{
                 Write-Host "Error connecting to SharePoint Site Collection '$siteName'. Is this URL correct?" -ForegroundColor Red
                 $site.url
-                Write-Host "Other Details below. Halting script." -ForegroundColor Red
+                Write-Host "Other Details below. Forcing SharePoint disconnection if connected. Halting script." -ForegroundColor Red
                 $_
                 Pause
                 Disconnect-PnPOnline
@@ -379,7 +380,15 @@ Try{
             }
 
             Write-Host "Columns found for group '$script:groupName':"
-            $script:emailColumns | Format-Table
+            Try{
+                $script:emailColumns | Format-Table
+            }
+            Catch{
+                Write-Host "Error displaying columns retrieved. Please re-check Site names and URLs. Skipping this Site for now"
+                $_
+                Pause
+                Continue
+            }
             Write-Host "These Columns will be added to the Site Content Types listed. Please enter 'Y' to confirm these are correct, or 'N' to skip this Site."
             $skipSite = $true
             switch(Read-Host -Prompt "Confirm"){
