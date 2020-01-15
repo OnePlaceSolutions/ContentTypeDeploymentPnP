@@ -48,13 +48,15 @@ Try{
             $this.contentTypes = @()
 
             $urlArray = $url.Split('/')
-            $rootUrl = $urlArray[0]+ '//' + $urlArray[2] + '/'
 
-            If($urlArray[3] -eq ""){
+            #Site collection URL (will not differ from web when working with the Site Collection, does differ when it's a SubWeb)
+            $rootUrl = $urlArray[0]+ '//' + $urlArray[2] + '/' + $urlArray[3] + '/' + $urlArray[4] + '/'
+
+            If($urlArray[3].Count -eq 0){
                 #This is the root site collection
                 $this.isSubSite = $false
             }
-            ElseIf($urlArray[3] -ne "sites"){
+            ElseIf(($urlArray[3] -ne "sites") -and ($urlArray[3] -ne "teams")){
                 #This is a subsite in the root site collection
                 For($i = 3; $i -lt $urlArray.Length; $i++){
                     If($urlArray[$i] -ne ""){
@@ -65,21 +67,23 @@ Try{
             }
             Else{
                 #This is a site collection with a possible subweb
-                $rootUrl += $urlArray[3] + '/' + $urlArray[4] + '/'
                 For($i = 3; $i -lt $urlArray.Length; $i++){
                     If($urlArray[$i] -ne ""){
                         $this.web += '/' + $urlArray[$i]
                     }
                 }
-                If($urlArray[5] -ne ""){
-                    $this.isSubSite = $true
+                If($urlArray[5].Count -eq 0){
+                    $this.isSubSite = $false
                 }
                 Else{
-                    $this.isSubSite = $false
+                    $this.isSubSite = $true
                 }
             }
 
             $this.url = $rootUrl
+            $temp = $this.web
+            $filler = "siteCol object created for Site located at $temp in Site Collection located at $rootUrl"
+            Write-Host $filler -ForegroundColor Green
         }
 
         [void]addContentTypeToDocumentLibrary($contentTypeName,$docLibName){
@@ -225,7 +229,7 @@ Try{
         Write-Host "Downloading provisioning xml template:" $Path -ForegroundColor Green 
         $WebClient.DownloadFile( $Url, $Path )   
         #Apply xml provisioning template to SharePoint
-        Write-Host "Applying email columns template to SharePoint:" $SharePointUrl -ForegroundColor Green 
+        Write-Host "Applying email columns template to Site Collection:" $siteCollection -ForegroundColor Green 
         
         $rawXml = Get-Content $Path
         
@@ -240,6 +244,7 @@ Try{
                 Write-Host $_.Exception.Message
             }
         }
+        #Start-Sleep -Seconds 5
     }
 
     #Starting menu for selection between SharePoint Online or SharePoint On-Premises, or exiting the script
@@ -325,8 +330,10 @@ Try{
         ForEach($site in $script:siteColsHT.Values){
             $siteName = $site.name
             $siteWeb = $site.web
-            Write-Host "Working with Site Collection: $siteName" -ForegroundColor Yellow
+            $siteUrl = $site.url
+            Write-Host "Working with Site: $siteName" -ForegroundColor Yellow
             Write-Host "Working with Web: $siteWeb" -ForegroundColor Yellow
+            Write-Host "Working in Site Collection Root: $siteUrl" -ForegroundColor Yellow
             #Authenticate against the Site Collection we are currently working with
             Try{
                 If($script:isSPOnline){
@@ -364,11 +371,13 @@ Try{
 
             #Retrieve all the columns/fields for the group specified in this Site Collection, we will add these to the named Content Types shortly. If we do not get the site columns, skip this Site Collection
             $script:emailColumns = Get-PnPField -Group $script:groupName
+            #If((-not $script:emailColumns) -or (-not $script:groupName) -or ($script:emailColumns.Count -eq 0)){
             If((-not $script:emailColumns) -or (-not $script:groupName)){
                 Write-Host "Email Columns not found in Site Columns group '$script:groupName' for Site Collection '$siteName'. Skipping."
                 Pause
                 Continue
             }
+
             Write-Host "Columns found for group '$script:groupName':"
             $script:emailColumns | Format-Table
             Write-Host "These Columns will be added to the Site Content Types listed. Please enter 'Y' to confirm these are correct, or 'N' to skip this Site."
@@ -396,7 +405,7 @@ Try{
             #For each Site Content Type listed for this siteCol/Site Collection, try and create it and add the email columns to it
             ForEach($ct in $site.contentTypes){
                 Try{
-                    Write-Host "Checking if Content Type '$ct' already exists" -ForegroundColor Yellow
+                    Write-Host "`nChecking if Content Type '$ct' already exists" -ForegroundColor Yellow
                     $foundContentType =  Get-PnPContentType -Identity $ct
                 
                     #If Content Type object returned is null, assume Content Type does not exist, create it. 
