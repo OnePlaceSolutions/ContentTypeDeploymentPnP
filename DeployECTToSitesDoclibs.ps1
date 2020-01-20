@@ -244,7 +244,7 @@ Try{
                 Write-Host $_.Exception.Message
             }
         }
-        #Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 5
     }
 
     #Starting menu for selection between SharePoint Online or SharePoint On-Premises, or exiting the script
@@ -371,9 +371,10 @@ Try{
             }
 
             #Retrieve all the columns/fields for the group specified in this Site Collection, we will add these to the named Content Types shortly. If we do not get the site columns, skip this Site Collection
-            $script:emailColumns = Get-PnPField -Group $script:groupName
-            #If((-not $script:emailColumns) -or (-not $script:groupName) -or ($script:emailColumns.Count -eq 0)){
-            If((-not $script:emailColumns) -or (-not $script:groupName)){
+
+            $emailColumns = Get-PnPField -Group $script:groupName
+
+            If((-not $emailColumns) -or (-not $script:groupName)){
                 Write-Host "Email Columns not found in Site Columns group '$script:groupName' for Site Collection '$siteName'. Skipping."
                 Pause
                 Continue
@@ -381,7 +382,7 @@ Try{
 
             Write-Host "Columns found for group '$script:groupName':"
             Try{
-                $script:emailColumns | Format-Table
+                $emailColumns | Format-Table
             }
             Catch{
                 Write-Host "Error displaying columns retrieved. Please re-check Site names and URLs. Skipping this Site for now"
@@ -446,9 +447,9 @@ Try{
                 #Try adding columns to the Content Type
                 Try{
                     Write-Host "Adding email columns to Site Content Type '$ct'"  -ForegroundColor Yellow
-                    $numColumns = $script:emailColumns.Count
+                    $numColumns = $emailColumns.Count
                     $i = 0
-                    ForEach($column in $script:emailColumns){
+                    ForEach($column in $emailColumns){
                         $column = $column.InternalName
                         Add-PnPFieldToContentType -Field $column -ContentType $ct
                         Write-Progress -Activity "Adding column: $column" -Status "To Site Content Type: $ct in Site Collection: $siteName. Progress:" -PercentComplete ($i/$numColumns*100)
@@ -483,11 +484,10 @@ Try{
                     }
                 }
                 Catch{
-                    Write-Host "Error adding Site Content Type '$ct' to Document Library '$libName'. Details below. Halting script." -ForegroundColor Red
+                    Write-Host "Error adding Site Content Type '$ct' to Document Library '$libName'. Details below. Skipping Content Type creation for this Location. If you have selected View creation, this will also be skipped for this Location." -ForegroundColor Red
                     $_
                     Pause
-                    Disconnect-PnPOnline
-                    Exit
+                    Continue
                 }
 
                 #Check if we are creating views
@@ -498,11 +498,9 @@ Try{
                     }
                 }
                 Catch{
-                    Write-Host "Error adding Default View '$script:emailViewName' to Document Library '$libName'. Details below. Halting script." -ForegroundColor Red
+                    Write-Host "Error adding Default View '$script:emailViewName' to Document Library '$libName'. Details below. Skipping View creation for this Location." -ForegroundColor Red
                     $_
                     Pause
-                    Disconnect-PnPOnline
-                    Exit
                 }
             }
             Write-Host "`n--------------------------------------------------------------------------------`n" -ForegroundColor Red
