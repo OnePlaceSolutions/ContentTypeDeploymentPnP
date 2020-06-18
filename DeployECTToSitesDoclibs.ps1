@@ -272,7 +272,7 @@ Try {
     }
 
     #Creates the Email Columns in the given Site Collection. Taken from the existing OnePlaceSolutions Email Column deployment script
-    function CreateEmailColumns([string]$siteCollection) {
+    function CreateEmailColumns([string]$siteCollection, [boolean]$retry) {
         If ($siteCollection -eq "") {
             $siteCollection = Read-Host -Prompt "Please enter the Site Collection URL to add the OnePlace Solutions Email Columns to"
         }
@@ -323,6 +323,28 @@ Try {
                     Write-Host $_.Exception.Message
                 }
             }
+            Try {
+                $tempColumns = Get-PnPField -Group $script:groupName
+                $emailColumnCount = 0
+                ForEach ($col in $tempColumns) {
+                    If (($col.InternalName -match 'Em') -or ($col.InternalName -match 'Doc')) {
+                        $emailColumnCount++
+                    }
+                }
+
+                If(($emailColumnCount -ne 35) -and ($retry -ne $false)){
+                    Write-Host "Not all columns were created. Retrying..."
+                    CreateEmailColumns -siteCollection $siteCollection -retry $false
+                }
+                Else{
+                    Throw
+                }
+            }
+            Catch{
+                Write-Host "Couldn't check columns after adding or a retry failed. Please try running the script against this Site Collection again. Halting Script."
+            }
+        }
+
         }
     }
     function CreateEmailView([string]$library, [string]$web) {
@@ -337,8 +359,9 @@ Try {
                     Write-Host "Adding Default View '$script:emailViewName' to Document Library '$libName'." -Foregroundcolor Yellow
                     $view = Add-PnPView -List $libName -Title $script:emailViewName -Fields "EmDate", "FileLeafRef", "EmTo", "EmFromName", "EmSubject" -SetAsDefault -RowLimit 100 -Web $web -ErrorAction Continue
                     #Let SharePoint catch up for a moment
-                    Start-Sleep -Seconds 2
+                    Start-Sleep -Seconds 3
                     $view = Get-PnPView -List $libName -Identity $script:emailViewName -Web $web -ErrorAction Continue
+                    $view
                     Write-Host "Success" -ForegroundColor Green 
                 }
                 Catch{
