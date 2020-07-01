@@ -19,6 +19,8 @@ Notes regarding the CSV file:
 
 When you have finished customizing the file, please save and close it to ensure the script can correctly read it.
 
+\* All actions performed with the script will be logged to 'OPSScriptLog.txt' in your Documents folder (or under the Administrator account's Documents if running PowerShell as an Administrator). When requesting assistance with this script please send this log file as an attachment.
+
 ### Prerequisites
 
 * Administrator rights to your SharePoint Admin Site (for SharePoint Online) and the Site Collections you wish to deploy to.
