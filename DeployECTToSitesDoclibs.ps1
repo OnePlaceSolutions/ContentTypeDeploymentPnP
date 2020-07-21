@@ -115,6 +115,9 @@ Try {
     #Holds our OAuth 2.0 token if using SharePoint Online
     $script:token = $null
     
+    #Columns to add to the Email View if we are creating one. Edit as required.
+    [string[]]$script:emailViewColumns = @("EmHasAttachments","EmSubject","EmTo","EmDate","EmFromName")
+
     [boolean]$script:emailColumnsXmlDownloaded = $false
 
     #Contains all the data we need relating to the Site Collection we are working with, including the Document Libraries and the Site Content Type names
@@ -465,7 +468,7 @@ Try {
                     $filler = "Adding Default View '$script:emailViewName' to Document Library '$libName'."
                     Write-Host $filler -Foregroundcolor Yellow
                     Write-Log -Level Info -Message $filler
-                    $view = Add-PnPView -List $libName -Title $script:emailViewName -Fields "EmDate", "FileLeafRef", "EmTo", "EmFromName", "EmSubject" -SetAsDefault -RowLimit 100 -Web $web -ErrorAction Continue
+                    $view = Add-PnPView -List $libName -Title $script:emailViewName -Fields $script:emailViewColumns -SetAsDefault -RowLimit 100 -Web $web -ErrorAction Continue
                     #Let SharePoint catch up for a moment
                     Start-Sleep -Seconds 3
                     $view = Get-PnPView -List $libName -Identity $script:emailViewName -Web $web -ErrorAction Continue
