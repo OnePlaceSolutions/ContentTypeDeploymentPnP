@@ -470,9 +470,10 @@ Try {
                     Write-Log -Level Info -Message $filler
                     $view = Add-PnPView -List $libName -Title $script:emailViewName -Fields $script:emailViewColumns -SetAsDefault -RowLimit 100 -Web $web -ErrorAction Continue
                     #Let SharePoint catch up for a moment
-                    Start-Sleep -Seconds 3
-                    $view = Get-PnPView -List $libName -Identity $script:emailViewName -Web $web -ErrorAction Continue
-                    $view
+
+                    Start-Sleep -Seconds 2
+                    $view = Get-PnPView -List $libName -Identity $script:emailViewName -Web $web -ErrorAction Stop
+
                     Write-Host "Success" -ForegroundColor Green 
                     Write-Log -Level Info -Message "Successfully created view '$script:emailViewName' in Document Library $libName in Web '$web'."
                 }
