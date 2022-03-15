@@ -123,6 +123,9 @@ Try {
     Try {
         Write-Log "Checking if PnP installed via Module..."
         $pnpModule = Get-InstalledModule "PnP.PowerShell" | Select-Object Name, Version
+        If($pnpModule.Name -ne "PnP.PowerShell" {
+                Write-Log -Level Error -Message "PnP Module likely not installed. Please re-check script pre-requisites in Documentation."
+        }
     }
     Catch {
         #Couldn't check PNP Module versions, Package Manager may be absent
