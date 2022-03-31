@@ -593,7 +593,7 @@ Try {
                         Write-Progress -Activity "Adding column: $column" -Status "To Site Content Type: $ct in Site Collection: $siteName. Progress:" -PercentComplete ($i / $numColumns * 100)
                         $i++
                     }
-                    If (($false -eq $emSubjectFound) -or ($numColumns -ne 35)) {
+                    If (($false -eq $emSubjectFound) -or ($numColumns -ne 34)) {
                         Throw "Not all Email Columns present. Please check you have added the columns to the Site Collection or elected to do so when prompted with this script."
                     }
                     Write-Progress -Activity "Done adding Columns" -Completed
