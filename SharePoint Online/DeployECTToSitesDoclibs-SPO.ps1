@@ -423,7 +423,7 @@ Try {
                                 
                                 $i++
                             }
-                            If (($false -eq $emSubjectFound) -or ($numColumns -ne 35)) {
+                            If (($false -eq $emSubjectFound) -or ($numColumns -ne 34)) {
                                 Write-Log -Level Warn -Message "Not all Email Columns present. Please check you have added the columns to the Site Collection or elected to do so when prompted with this script."
                             }
                         }
