@@ -538,7 +538,7 @@ Try {
 
     #Grabs the CSV file and enumerate it into siteColHT as siteCol and docLib objects to work with later
     function EnumerateSitesDocLibs([string]$csvFile) {
-        If ($csvFile -eq "") {
+        If ( [string]::IsNullOrWhitespace( $csvFile ) ) {
             Write-Host "Please select your customized CSV containing the Site Collections and Document Libraries to create the Content Types in"
             Start-Sleep -seconds 1
             $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{ 
@@ -573,11 +573,11 @@ Try {
                 }
 
                 #Don't create siteCol objects that do not have a URL, this also accounts for empty lines at EOF
-                If ($csv_siteUrl -ne "") {
+                If ( -not [string]::IsNullOrWhiteSpace( $csv_siteUrl ) ) {
                     #If a name is not defined, use the URL
-                    If ($csv_siteName -eq "") { $csv_siteName = $element.SiteUrl }
+                    If ( [string]::IsNullOrWhiteSpace( $csv_siteName ) ) { $csv_siteName = $element.SiteUrl }
 
-                    If ($script:siteColsHT.ContainsKey($csv_siteUrl)) {
+                    If ($script:siteColsHT.ContainsKey( $csv_siteUrl ) ) {
                         $script:siteColsHT.$csv_siteUrl.addContentTypeToDocumentLibraryObj($csv_contentType, $csv_docLib)
                     }
                     Else {
@@ -601,7 +601,7 @@ Try {
     function ConnectToSharePointOnline([string]$tenant) {
         #Prompt for SharePoint Root Site Url     
         Try {
-            If ($tenant -eq "") {
+            If ( [string]::IsNullOrWhitespace( $tenant ) ) {
                 $rootSharePointUrl = Read-Host -Prompt "Please enter your SharePoint Online Root Site Collection URL, eg (without quotes) 'https://contoso.sharepoint.com'"
                 Write-Log "Root SharePoint URL entered: $rootSharePointUrl"
                 $rootSharePointUrl = $rootSharePointUrl.Trim("'")
@@ -609,7 +609,7 @@ Try {
                 Write-Log "Sanitized: $rootSharePointUrl"
             }
             Else {
-                $rootSharePointUrl = "https://$tenant.sharepoint.com"
+                $rootSharePointUrl = "https://$( $tenant ).sharepoint.com"
             }
             
             #Check we aren't already logged in to this SharePoint Tenant
@@ -656,14 +656,14 @@ Try {
         Write-Host "`n--------------------------------------------------------------------------------`n" -ForegroundColor Red
         Write-Host 'Please make a selection to set, toggle, change or execute:' -ForegroundColor Yellow
         Write-Host "1: Select CSV file. Path: $($script:csvFilePath)"
-        Write-Host "2: Enable Email Column Creation: $($script:createEmailColumns)"
-        Write-Host "3: Email Column Group: $($script:columnGroupName)"
-        Write-Host "4: Enable Email View Creation: $($script:createEmailViews)"
-        Write-Host "5: Email View Name: $($script:emailViewname)"
-        Write-Host "6: Set View '$($script:emailViewName)' as default: $($script:emailViewDefault)"
+        Write-Host "2: Enable Email Column Creation: $( $script:createEmailColumns )"
+        Write-Host "3: Email Column Group: $( $script:columnGroupName )"
+        Write-Host "4: Enable Email View Creation: $( $script:createEmailViews )"
+        Write-Host "5: Email View Name: $( $script:emailViewname )"
+        Write-Host "6: Set View '$( $script:emailViewName )' as default: $( $script:emailViewDefault )"
         Write-Host "7: Deploy"
         Write-Host "`nAdditional Configuration Options:" -ForegroundColor Yellow
-        Write-Host "L: Change Log file path (currently: '$script:logPath')"
+        Write-Host "L: Change Log file path (currently: '$( $script:logPath )')"
         Write-Host "`nQ: Press 'Q' to quit."
     }
 
@@ -750,13 +750,13 @@ Try {
                 }
                 Else {
                     #Connect to SharePoint Online, using PnP Management Shell
-                    If("" -ne $script:extractedTenant) {
-                        Write-Host "`nExtracted Tenant Name '$script:extractedTenant' from CSV, is this correct?"
+                    If(-not [string]::IsNullOrEmpty( $script:extractedTenant ) ) {
+                        Write-Host "`nExtracted Tenant Name '$( $script:extractedTenant )' from CSV, is this correct?"
                         Write-Host "N: No" 
                         Write-Host "Y: Yes"
                         $otherInput = Read-Host "Please select an option" 
                         If($otherInput[0] -eq 'Y') {
-                            Write-Log -Level Info -Message "User has confirmed extracted Tenant name '$($script:extractedTenant)'."
+                            Write-Log -Level Info -Message "User has confirmed extracted Tenant name '$( $script:extractedTenant )'."
                             ConnectToSharePointOnline -Tenant $script:extractedTenant
                         }
                         Else {
