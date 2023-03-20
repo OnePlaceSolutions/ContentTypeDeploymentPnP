@@ -302,7 +302,7 @@ Try {
                     #From 'https://github.com/OnePlaceSolutions/EmailColumnsPnP/blob/master/installEmailColumns.ps1'
                     #Download xml provisioning template
                     $WebClient = New-Object System.Net.WebClient
-                    $downloadUrl = "https://raw.githubusercontent.com/OnePlaceSolutions/EmailColumnsPnP/master/email-columns.xml"    
+                    $downloadUrl = "https://cdn.oneplacesolutions.com/assets/sharepoint-provisioning/email-columns.xml"    
                 
                     Write-Log "Downloading provisioning xml template:" $script:columnsXMLPath
                     $WebClient.DownloadFile( $downloadUrl, $script:columnsXMLPath )
