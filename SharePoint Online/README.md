@@ -36,7 +36,7 @@ When you have finished customizing the file, please save and close it to ensure 
 
     Install new PnP.PowerShell Cmdlets:
     ```
-    Install-Module -Name "PnP.PowerShell"
+    Install-Module -Name "PnP.PowerShell" -RequiredVersion 1.12.0
     ```
     Note that you will need to ensure you have uninstalled any previous 'Classic' PnP Cmdlets prior to installing this. If you have installed the cmdlets previously using an MSI file these need to be uninstalled from Control Panel, but if you have installed the cmdlets previously using PowerShell Get you can uninstall them with this command (as Administrator):
 
