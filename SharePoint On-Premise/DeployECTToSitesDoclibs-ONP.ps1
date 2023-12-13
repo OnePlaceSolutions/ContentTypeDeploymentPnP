@@ -6,7 +6,6 @@ $ErrorActionPreference = 'Stop'
 
 #Columns to add to the Email View if we are creating one. Edit as required based on Internal Naming
 [string[]]$script:emailViewColumns = @("EmHasAttachments","EmSubject","EmTo","EmDate","EmFromName")
-$script:rowLimit = 100
 [string]$script:viewQuery = "<Where><Eq><FieldRef Name='FSObjType'/><Value Type='Integer'>0</Value></Eq></Where><OrderBy><FieldRef Name='EmDate' Ascending='FALSE'/></OrderBy>"
 
 $script:logFile = "OPSScriptLog.txt"
@@ -394,7 +393,7 @@ Try {
                 Catch [System.NullReferenceException]{
                     #View does not exist, this is good
                     Write-Host "Adding Default View '$script:emailViewName' to Document Library '$libName'." -Foregroundcolor Yellow
-                    $view = Add-PnPView -List $libName -Title $script:emailViewName -Fields $script:emailViewColumns -SetAsDefault -RowLimit $script:rowLimit -Web $web -ErrorAction Continue -Query $script:viewQuery
+                    $view = Add-PnPView -List $libName -Title $script:emailViewName -Fields $script:emailViewColumns -SetAsDefault -Web $web -ErrorAction Continue -Query $script:viewQuery
                     #Let SharePoint catch up for a moment
                     Start-Sleep -Seconds 2
                     $view = Get-PnPView -List $libName -Identity $script:emailViewName -Web $web -ErrorAction Stop
