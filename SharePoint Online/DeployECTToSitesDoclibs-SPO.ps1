@@ -6,7 +6,6 @@ $ErrorActionPreference = 'Stop'
 
 #Columns to add to the Email View if we are creating one, it's row limit and it's sort query. Edit as required based on Internal Naming
 [string[]]$script:emailViewColumns = @("EmHasAttachments","EmSubject","EmTo","EmDate","EmFromName")
-$script:rowLimit = 100
 [string]$script:viewQuery = "<Where><Eq><FieldRef Name='FSObjType'/><Value Type='Integer'>0</Value></Eq></Where><OrderBy><FieldRef Name='EmDate' Ascending='FALSE'/></OrderBy>"
 
 #Flags for whether we create  email views or not, and if so what name to use
@@ -515,11 +514,11 @@ Try {
                     Write-Log "Adding Email View '$viewName' to Document Library '$($this.name)'."
                     If($script:emailViewDefault) {
                         Write-Log "Email View will be created as default view..."
-                        Add-PnPView -List $this.name -Title $viewName -Fields $script:emailViewColumns -Query $script:viewQuery -SetAsDefault -RowLimit $script:rowLimit -Paged -ErrorAction Continue
+                        Add-PnPView -List $this.name -Title $viewName -Fields $script:emailViewColumns -Query $script:viewQuery -SetAsDefault -Paged -ErrorAction Continue
                     }
                     Else {
                         Write-Log "Email View will not be created as default view..."
-                        Add-PnPView -List $this.name -Title $viewName -Fields $script:emailViewColumns -Query $script:viewQuery -RowLimit $script:rowLimit -Paged -ErrorAction Continue
+                        Add-PnPView -List $this.name -Title $viewName -Fields $script:emailViewColumns -Query $script:viewQuery -Paged -ErrorAction Continue
                     }
                     #Let SharePoint catch up for a moment
                     Start-Sleep -Seconds 2
